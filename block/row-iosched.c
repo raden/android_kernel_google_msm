@@ -118,9 +118,8 @@ struct rowq_idling_data {
  * @prio:		queue priority (enum row_queue_prio)
  * @nr_dispatched:	number of requests already dispatched in
  *			the current dispatch cycle
+ * @slice:		number of requests to dispatch in a cycle
  * @nr_req:		number of requests in queue
- * @dispatch quantum:	number of requests this queue may
- *			dispatch in a dispatch cycle
  * @idle_data:		data for idling on queues
  *
  */
@@ -133,6 +132,8 @@ struct row_queue {
 
 	unsigned int		nr_req;
 	int			disp_quantum;
+
+	unsigned int		nr_req;
 
 	/* used only for READ queues */
 	struct rowq_idling_data	idle_data;
@@ -238,7 +239,8 @@ static inline void __maybe_unused row_dump_queues_stat(struct row_data *rd)
 {
 	int i;
 
-	row_log(rd->dispatch_queue, " Queues status:");
+	row_log(rd->dispatch_queue, " Queues status (curr_queue=%d):",
+			rd->curr_queue);
 	for (i = 0; i < ROWQ_MAX_PRIO; i++)
 		row_log(rd->dispatch_queue,
 			"queue%d: dispatched= %d, nr_req=%d", i,
@@ -380,24 +382,11 @@ static void row_add_request(struct request_queue *q,
 
 		rqueue->idle_data.last_insert_time = ktime_get();
 	}
-	if (row_queues_def[rqueue->prio].is_urgent &&
-	    !rd->pending_urgent_rq && !rd->urgent_in_flight) {
-		/* Handle High Priority queues */
-		if (rqueue->prio < ROWQ_REG_PRIO_IDX &&
-		    rd->last_served_ioprio_class != IOPRIO_CLASS_RT &&
-		    queue_was_empty) {
-			row_log_rowq(rd, rqueue->prio,
-				"added (high prio) urgent request");
-			rq->cmd_flags |= REQ_URGENT;
-			rd->pending_urgent_rq = rq;
-		} else  if (row_rowq_unserved(rd, rqueue->prio)) {
-			/* Handle Regular priotity queues */
-			row_log_rowq(rd, rqueue->prio,
-				"added urgent request (total on queue=%d)",
-				rqueue->nr_req);
-			rq->cmd_flags |= REQ_URGENT;
-			rd->pending_urgent_rq = rq;
-		}
+	if (urgent_queues[rqueue->prio] &&
+	    row_rowq_unserved(rd, rqueue->prio)) {
+		row_log_rowq(rd, rqueue->prio,
+			"added urgent request (total on queue=%d)",
+			rqueue->nr_req);
 	} else
 		row_log_rowq(rd, rqueue->prio,
 			"added request (total on queue=%d)", rqueue->nr_req);
@@ -427,37 +416,7 @@ static int row_reinsert_req(struct request_queue *q,
 	rqueue->nr_req++;
 
 	row_log_rowq(rd, rqueue->prio,
-		"%s request reinserted (total on queue=%d)",
-		(rq_data_dir(rq) == READ ? "READ" : "write"), rqueue->nr_req);
-
-	if (rq->cmd_flags & REQ_URGENT) {
-		/*
-		 * It's not compliant with the design to re-insert
-		 * urgent requests. We want to be able to track this
-		 * down.
-		 */
-		WARN_ON(1);
-		if (!rd->urgent_in_flight) {
-			pr_err("%s(): no urgent in flight", __func__);
-		} else {
-			rd->urgent_in_flight = false;
-			pr_err("%s(): reinserting URGENT %s req",
-				__func__,
-				(rq_data_dir(rq) == READ ? "READ" : "WRITE"));
-			if (rd->pending_urgent_rq) {
-				pr_err("%s(): urgent rq is pending",
-					__func__);
-				rd->pending_urgent_rq->cmd_flags &= ~REQ_URGENT;
-			}
-			rd->pending_urgent_rq = rq;
-		}
-	}
-	return 0;
-}
-
-static void row_completed_req(struct request_queue *q, struct request *rq)
-{
-	struct row_data *rd = q->elevator->elevator_data;
+		"request reinserted (total on queue=%d)", rqueue->nr_req);
 
 	 if (rq->cmd_flags & REQ_URGENT) {
 		if (!rd->urgent_in_flight) {
@@ -506,13 +465,10 @@ static bool row_urgent_pending(struct request_queue *q)
 static void row_remove_request(struct row_data *rd,
 			       struct request *rq)
 {
+	struct row_data *rd = (struct row_data *)q->elevator->elevator_data;
 	struct row_queue *rqueue = RQ_ROWQ(rq);
 
-	list_del_init(&(rq)->queuelist);
-	if (rd->pending_urgent_rq == rq)
-		rd->pending_urgent_rq = NULL;
-	else
-		BUG_ON(rq->cmd_flags & REQ_URGENT);
+	rq_fifo_clear(rq);
 	rqueue->nr_req--;
 	rd->nr_reqs[rq_data_dir(rq)]--;
 }
@@ -725,14 +681,24 @@ static int row_get_next_queue(struct request_queue *q, struct row_data *rd,
 static int row_dispatch_requests(struct request_queue *q, int force)
 {
 	struct row_data *rd = (struct row_data *)q->elevator->elevator_data;
-	int ret = 0, currq, ioprio_class_to_serve, start_idx, end_idx;
+	int ret = 0, currq, i;
 
-	if (force && hrtimer_active(&rd->rd_idle_data.hr_timer)) {
-		if (hrtimer_try_to_cancel(&rd->rd_idle_data.hr_timer) >= 0) {
-			row_log(rd->dispatch_queue,
-				"Canceled delayed work on %d - forced dispatch",
-				rd->rd_idle_data.idling_queue_idx);
-			rd->rd_idle_data.idling_queue_idx = ROWQ_MAX_PRIO;
+	currq = rd->curr_queue;
+
+	/*
+	 * Find the first unserved queue (with higher priority then currq)
+	 * that is not empty
+	 */
+	for (i = 0; i < currq; i++) {
+		if (row_rowq_unserved(rd, i) &&
+		    !list_empty(&rd->row_queues[i].rqueue.fifo)) {
+			row_log_rowq(rd, currq,
+				" Preemting for unserved rowq%d. (nr_req=%u)",
+				i, rd->row_queues[currq].rqueue.nr_req);
+			rd->curr_queue = i;
+			row_dispatch_insert(rd);
+			ret = 1;
+			goto done;
 		}
 	}
 
@@ -864,13 +830,6 @@ static void row_merged_requests(struct request_queue *q, struct request *rq,
 
 	list_del_init(&next->queuelist);
 	rqueue->nr_req--;
-	if (rqueue->rdata->pending_urgent_rq == next) {
-		pr_err("\n\nROW_WARNING: merging pending urgent!");
-		rqueue->rdata->pending_urgent_rq = rq;
-		rq->cmd_flags |= REQ_URGENT;
-		WARN_ON(!(next->cmd_flags & REQ_URGENT));
-		next->cmd_flags &= ~REQ_URGENT;
-	}
 	rqueue->rdata->nr_reqs[rq_data_dir(rq)]--;
 }
 
