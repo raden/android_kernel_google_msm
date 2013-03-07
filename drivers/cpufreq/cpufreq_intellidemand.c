@@ -5,6 +5,7 @@
  *            (C)  2003 Venkatesh Pallipadi <venkatesh.pallipadi@intel.com>.
  *                      Jun Nakajima <jun.nakajima@intel.com>
  *            (C)  2012 Paul Reioux <reioux@gmail.com>
+ *            (C)  2013 Paul Reioux <reioux@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -31,7 +32,8 @@
 #endif
 #include <linux/rq_stats.h>
 
-#define INTELLIDEMAND_VERSION	3.2
+#define INTELLIDEMAND_MAJOR_VERSION	4
+#define INTELLIDEMAND_MINOR_VERSION	2
 
 /*
  * dbs is used in this file as a shortform for demandbased switching
@@ -1191,25 +1193,16 @@ static void do_dbs_timer(struct work_struct *work)
 	nr_run_stat = calculate_thread_stats();
 	//pr_info("run stats: %u\n", nr_run_stat);
 
-#if 1
-	if (cpu == BOOT_CPU && lmf_screen_state) {
-		switch (nr_run_stat) {
-			case 1:
-				if (persist_count > 0)
-					persist_count--;
+	if (num_online_cpus() >= 2 && rq_info.rq_avg > 38)
+		rq_persist_count++;
+	else
+		if (rq_persist_count > 0)
+			rq_persist_count--;
 
-				if (num_online_cpus() == 2 && persist_count == 0)
-					cpu_down(1);
-				break;
-			case 2:
-				persist_count = 8;
-				if (num_online_cpus() == 1)
-					cpu_up(1);
-				break;
-			default:
-				pr_err("Run Stat Error: Bad value %u\n", nr_run_stat);
-				break;
-		}
+#ifdef CONFIG_CPUFREQ_LIMIT_MAX_FREQ
+	if (rq_persist_count > 3) {
+		lmf_browsing_state = false;
+		rq_persist_count = 0;
 	}
 	if (num_online_cpus() == 2 && rq_info.rq_avg > 38)
 		lmf_browsing_state = false;
@@ -1219,7 +1212,6 @@ static void do_dbs_timer(struct work_struct *work)
 
 	//pr_info("Run Queue Average: %u\n", rq_info.rq_avg);
 
-#ifdef CONFIG_CPUFREQ_LIMIT_MAX_FREQ
 	if (!lmf_browsing_state && lmf_screen_state)
 	{
 		if (cpu == BOOT_CPU)
