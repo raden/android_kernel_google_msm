@@ -10,7 +10,6 @@ export KBUILD_BUILD_USER=najmi
 export KBUILD_BUILD_HOST="ampang"
 export LOCALVERSION="-Aufa-kernel-REL-$1"
 
-
 #echo "Copy backup config..."
 #cp najmi-mako-config .config
 make cyanogen_mako_defconfig
