@@ -46,7 +46,7 @@ static int orig_up_threshold = 90;
 #define MIN_FREQUENCY_UP_THRESHOLD		(11)
 #define MAX_FREQUENCY_UP_THRESHOLD		(100)
 #define MIN_FREQUENCY_DOWN_DIFFERENTIAL		(1)
-#define DBS_INPUT_EVENT_MIN_FREQ		(960000)
+#define DBS_INPUT_EVENT_MIN_FREQ		(918000)
 #define DEF_UI_DYNAMIC_SAMPLING_RATE		(15000)
 #define DBS_UI_SAMPLING_MIN_TIMEOUT		(30)
 #define DBS_UI_SAMPLING_MAX_TIMEOUT		(1000)
@@ -167,7 +167,7 @@ static struct dbs_tuners {
 	.ui_sampling_rate = DEF_UI_DYNAMIC_SAMPLING_RATE,
 	.ui_timeout = DBS_UI_SAMPLING_TIMEOUT,
 	.enable_boost_cpu = 1,
-	.gboost = 1,
+	.gboost = 0,
 };
 
 bool is_elementalx_locked(void)
