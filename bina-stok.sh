@@ -2,7 +2,7 @@ export ARCH=arm
 unset CROSS_COMPILE
 #export CROSS_COMPILE=/opt/gcc-4.8-linaro/bin/arm-cortex_a15-linux-gnueabi- 
 #export CROSS_COMPILE=/opt/gcc-4.7-linaro/bin/arm-cortex_a15-linux-gnueabi- 
-export CROSS_COMPILE=/opt/sabermod-gcc/bin/arm-eabi-
+export CROSS_COMPILE=/opt/sabermod-gcc/bin/arm-linux-androideabi-
 
 #echo "Cleaning old craps..."
 #make distclean
