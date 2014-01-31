@@ -45,25 +45,9 @@
 #define PRI_SRC_SEL_HFPLL	1
 #define PRI_SRC_SEL_HFPLL_DIV2	2
 
-//#define FREQ_TABLE_SIZE		35
+#define FREQ_TABLE_SIZE		35
 
-//#define FREQ_TABLE_SIZE		35
-
-#define SECCLKAGD              BIT(4)
-
-#ifdef CONFIG_OC_ULTIMATE
-#ifdef CONFIG_LOW_CPUCLOCKS
-#define FREQ_TABLE_SIZE                41
-#else
-#define FREQ_TABLE_SIZE                37
-#endif
-#else
-#ifdef CONFIG_LOW_CPUCLOCKS
-#define FREQ_TABLE_SIZE                39
-#else
-#define FREQ_TABLE_SIZE                35
-#endif
-#endif
+#define FREQ_TABLE_SIZE		35
 
 static DEFINE_MUTEX(driver_lock);
 static DEFINE_SPINLOCK(l2_lock);
