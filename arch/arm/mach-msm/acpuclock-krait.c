@@ -45,6 +45,9 @@
 #define PRI_SRC_SEL_HFPLL	1
 #define PRI_SRC_SEL_HFPLL_DIV2	2
 
+//#define FREQ_TABLE_SIZE		35
+
+//#define FREQ_TABLE_SIZE		35
 
 #define SECCLKAGD              BIT(4)
 
