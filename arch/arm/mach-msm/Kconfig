@@ -1645,6 +1645,9 @@ config CPUCLOCK_TINGGI
 	help
 	  CPU frekuensi yang tinggi dibenarkan untuk CPU dan Cache L2
 
+config MSM_CPU_VOLTAGE_CONTROL
+	bool "Userspace CPU Voltage Control"
+
 config USERSPACE_VOLTAGE_CONTROL
 	bool "Enable Userspace CPU Voltage Control"
 	default y
