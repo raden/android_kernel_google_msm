@@ -2104,12 +2104,11 @@ static void touch_late_resume(struct early_suspend *h)
 				ktime_set(0, ts->pdata->role->report_period),
 						HRTIMER_MODE_REL);
 
-		if (ts->pdata->role->resume_pwr == POWER_ON)
-			queue_delayed_work(touch_wq, &ts->work_init,
-				msecs_to_jiffies(ts->pdata->role->booting_delay));
-		else
-			queue_delayed_work(touch_wq, &ts->work_init, 0);
-	}
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+	} else {
+			disable_irq_wake(ts->client->irq);
+			}
+#endif
 }
 #endif
 
