@@ -274,7 +274,6 @@ static struct acpu_level tbl_nom[] __initdata = {
 	{ 0, {  1890000, HFPLL, 1, 0x46 }, L2(14), 1150000 },
 	{ 0, {  1971000, HFPLL, 1, 0x49 }, L2(14), 1150000 },
 #endif
-
 	{ 0, { 0 } }
 };
 
@@ -706,9 +705,7 @@ static struct acpu_level tbl_PVS4_2000MHz[] __initdata = {
 	{ 1, {  1350000, HFPLL, 1, 0x32 }, L2(14),  975000 },
 	{ 1, {  1458000, HFPLL, 1, 0x36 }, L2(14), 1000000 },
 	{ 1, {  1566000, HFPLL, 1, 0x3A }, L2(14), 1037500 },
-	{ 1, {  1674000, HFPLL, 1, 0x3E }, L2(14), 1075000 },
-	{ 1, {  1782000, HFPLL, 1, 0x42 }, L2(14), 1112500 },
-	{ 1, {  1890000, HFPLL, 1, 0x46 }, L2(14), 1150000 },
+		{ 1, {  1890000, HFPLL, 1, 0x46 }, L2(14), 1150000 },
 	{ 0, { 0 } }
 };
 
@@ -790,8 +787,8 @@ static struct acpuclk_krait_params acpuclk_8064_params __initdata = {
 	.l2_freq_tbl_size = sizeof(l2_freq_tbl),
 	.bus_scale = &bus_scale_data,
 	.pte_efuse_phys = 0x007000C0,
-	.get_bin_info = get_krait_bin_format_a,	
-	.stby_khz = 384000,
+	.get_bin_info = get_krait_bin_format_a,
+	.stby_khz = 27000,
 };
 
 static int __init acpuclk_8064_probe(struct platform_device *pdev)
