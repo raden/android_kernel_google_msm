@@ -214,8 +214,8 @@ static struct acpu_level tbl_slow[] __initdata = {
 	{ 0, {  1296000, HFPLL, 1, 0x30 }, L2(14), 1125000 },
 	{ 1, {  1350000, HFPLL, 1, 0x32 }, L2(14), 1125000 },
 	{ 0, {  1404000, HFPLL, 1, 0x34 }, L2(14), 1137500 },
-	{ 1, {  1458000, HFPLL, 1, 0x36 }, L2(14), 1137500 },
-	{ 1, {  1512000, HFPLL, 1, 0x38 }, L2(14), 1150000 },
+	{ 0, {  1458000, HFPLL, 1, 0x36 }, L2(14), 1137500 },
+	{ 0, {  1512000, HFPLL, 1, 0x38 }, L2(14), 1150000 },
 
 #ifdef CONFIG_CPUCLOCK_TINGGI
 	{ 1, {  1458000, HFPLL, 1, 0x36 }, L2(14), 1137500 },
@@ -264,8 +264,8 @@ static struct acpu_level tbl_nom[] __initdata = {
 	{ 0, {  1296000, HFPLL, 1, 0x30 }, L2(14), 1075000 },
 	{ 1, {  1350000, HFPLL, 1, 0x32 }, L2(14), 1075000 },
 	{ 0, {  1404000, HFPLL, 1, 0x34 }, L2(14), 1087500 },
-	{ 1, {  1458000, HFPLL, 1, 0x36 }, L2(14), 1087500 },
-	{ 1, {  1512000, HFPLL, 1, 0x38 }, L2(14), 1100000 },
+	{ 0, {  1458000, HFPLL, 1, 0x36 }, L2(14), 1087500 },
+	{ 0, {  1512000, HFPLL, 1, 0x38 }, L2(14), 1100000 },
 
 #ifdef CONFIG_CPUCLOCK_TINGGI
 	{ 1, {  1458000, HFPLL, 1, 0x36 }, L2(14), 1137500 },
@@ -314,8 +314,8 @@ static struct acpu_level tbl_fast[] __initdata = {
 	{ 0, {  1296000, HFPLL, 1, 0x30 }, L2(14), 1025000 },
 	{ 1, {  1350000, HFPLL, 1, 0x32 }, L2(14), 1025000 },
 	{ 0, {  1404000, HFPLL, 1, 0x34 }, L2(14), 1037500 },
-	{ 1, {  1458000, HFPLL, 1, 0x36 }, L2(14), 1037500 },
-	{ 1, {  1512000, HFPLL, 1, 0x38 }, L2(14), 1050000 },
+	{ 0, {  1458000, HFPLL, 1, 0x36 }, L2(14), 1037500 },
+	{ 0, {  1512000, HFPLL, 1, 0x38 }, L2(14), 1050000 },
 
 #ifdef CONFIG_CPUCLOCK_TINGGI
 	{ 1, {  1458000, HFPLL, 1, 0x36 }, L2(14), 1137500 },
@@ -365,8 +365,8 @@ static struct acpu_level tbl_faster[] __initdata = {
 	{ 0, {  1296000, HFPLL, 1, 0x30 }, L2(14), 1100000 },
 	{ 1, {  1350000, HFPLL, 1, 0x32 }, L2(14), 1100000 },
 	{ 0, {  1404000, HFPLL, 1, 0x34 }, L2(14), 1112500 },
-	{ 1, {  1458000, HFPLL, 1, 0x36 }, L2(14), 1112500 },
-	{ 1, {  1512000, HFPLL, 1, 0x38 }, L2(14), 1125000 },
+	{ 0, {  1458000, HFPLL, 1, 0x36 }, L2(14), 1112500 },
+	{ 0, {  1512000, HFPLL, 1, 0x38 }, L2(14), 1125000 },
 
 #ifdef CONFIG_CPUCLOCK_TINGGI
 	{ 1, {  1458000, HFPLL, 1, 0x36 }, L2(14), 1137500 },
@@ -750,7 +750,7 @@ static struct acpu_level tbl_PVS6_2000MHz[] __initdata = {
 static struct pvs_table pvs_tables[NUM_SPEED_BINS][NUM_PVS] __initdata = {
 	[0][PVS_SLOW]    = {tbl_slow, sizeof(tbl_slow),     0 },
 	[0][PVS_NOMINAL] = {tbl_nom,  sizeof(tbl_nom),  25000 },
-	[0][PVS_FAST]    = {tbl_fast, sizeof(tbl_fast), 25000 },
+	00][PVS_FAST]    = {tbl_fast, sizeof(tbl_fast), 25000 },
 	[0][PVS_FASTER]  = {tbl_faster, sizeof(tbl_faster), 25000 },
 
 	[1][0] = { tbl_PVS0_1700MHz, sizeof(tbl_PVS0_1700MHz),     0 },
