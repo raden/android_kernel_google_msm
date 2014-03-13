@@ -815,3 +815,57 @@ static int __init acpuclk_8064_init(void)
 				     acpuclk_8064_probe);
 }
 device_initcall(acpuclk_8064_init);
+S3_2000MHz, sizeof(tbl_PVS3_2000MHz),     25000 },
+	[2][4] = { tbl_PVS4_2000MHz, sizeof(tbl_PVS4_2000MHz),     25000 },
+	[2][5] = { tbl_PVS5_2000MHz, sizeof(tbl_PVS5_2000MHz),     25000 },
+	[2][6] = { tbl_PVS6_2000MHz, sizeof(tbl_PVS6_2000MHz),     25000 },
+
+	[14][0] = { tbl_PVS0_1512MHz, sizeof(tbl_PVS0_1512MHz),     0 },
+	[14][1] = { tbl_PVS1_1512MHz, sizeof(tbl_PVS1_1512MHz),     25000 },
+	[14][2] = { tbl_PVS2_1512MHz, sizeof(tbl_PVS2_1512MHz),     25000 },
+	[14][3] = { tbl_PVS3_1512MHz, sizeof(tbl_PVS3_1512MHz),     25000 },
+	[14][4] = { tbl_PVS4_1512MHz, sizeof(tbl_PVS4_1512MHz),     25000 },
+	[14][5] = { tbl_PVS5_1512MHz, sizeof(tbl_PVS5_1512MHz),     25000 },
+	[14][6] = { tbl_PVS6_1512MHz, sizeof(tbl_PVS6_1512MHz),     25000 },
+};
+
+static struct acpuclk_krait_params acpuclk_8064_params __initdata = {
+	.scalable = scalable,
+	.scalable_size = sizeof(scalable),
+	.hfpll_data = &hfpll_data,
+	.pvs_tables = pvs_tables,
+	.l2_freq_tbl = l2_freq_tbl,
+	.l2_freq_tbl_size = sizeof(l2_freq_tbl),
+	.bus_scale = &bus_scale_data,
+	.pte_efuse_phys = 0x007000C0,
+#ifdef CONFIG_LOW_CPUCLOCKS
+	.stby_khz = 27000,
+#else
+	.stby_khz = 384000,
+#endif
+};
+
+static int __init acpuclk_8064_probe(struct platform_device *pdev)
+{
+	if (cpu_is_apq8064ab() ||
+		SOCINFO_VERSION_MAJOR(socinfo_get_version()) == 2) {
+		acpuclk_8064_params.hfpll_data->low_vdd_l_max = 37;
+		acpuclk_8064_params.hfpll_data->nom_vdd_l_max = 74;
+	}
+
+	return acpuclk_krait_init(&pdev->dev, &acpuclk_8064_params);
+}
+
+static struct platform_driver acpuclk_8064_driver = {
+	.driver = {
+		.name = "acpuclk-8064",
+		.owner = THIS_MODULE,
+	},
+};
+
+static int __init acpuclk_8064_init(void)
+{
+	return platform_driver_probe(&acpuclk_8064_driver,
+				     acpuclk_8064_probe);
+}
+device_initcall(acpuclk_8064_init);
