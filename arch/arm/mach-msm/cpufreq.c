@@ -71,6 +71,10 @@ static int set_cpu_freq(struct cpufreq_policy *policy, unsigned int new_freq)
 	struct cpufreq_freqs freqs;
 	struct cpu_freq *limit = &per_cpu(cpu_freq_info, policy->cpu);
 
+#ifdef CONFIG_TURBO_BOOST
+	new_freq = msm_turbo(new_freq);
+#endif
+
 	if (limit->limits_init) {
 		if (new_freq > limit->allowed_max) {
 			new_freq = limit->allowed_max;
