@@ -1,10 +1,6 @@
 VERSION = 3
 PATCHLEVEL = 4
-<<<<<<< HEAD
-SUBLEVEL = 83
-=======
 SUBLEVEL = 84
->>>>>>> d78698a... Linux 3.4.84
 EXTRAVERSION =
 NAME = Saber-toothed Squirrel
 
