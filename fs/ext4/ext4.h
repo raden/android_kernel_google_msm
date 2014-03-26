@@ -751,6 +751,8 @@ do {									       \
 	if (EXT4_FITS_IN_INODE(raw_inode, einode, xtime))		       \
 		(einode)->xtime.tv_sec = 				       \
 			(signed)le32_to_cpu((raw_inode)->xtime);	       \
+	else								       \
+		(einode)->xtime.tv_sec = 0;				       \
 	if (EXT4_FITS_IN_INODE(raw_inode, einode, xtime ## _extra))	       \
 		ext4_decode_extra_time(&(einode)->xtime,		       \
 				       raw_inode->xtime ## _extra);	       \
@@ -2221,12 +2223,6 @@ static inline void ext4_unlock_group(struct super_block *sb,
 					ext4_group_t group)
 {
 	spin_unlock(ext4_group_lock_ptr(sb, group));
-}
-
-static inline void ext4_mark_super_dirty(struct super_block *sb)
-{
-	if (EXT4_SB(sb)->s_journal == NULL)
-		sb->s_dirt =1;
 }
 
 /*
