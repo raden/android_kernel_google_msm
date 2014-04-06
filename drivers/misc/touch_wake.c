@@ -77,9 +77,9 @@ static void touchwake_early_suspend(struct early_suspend *h)
 		wake_lock(&touchwake_wake_lock);
 		schedule_delayed_work(&touchoff_work,
 					msecs_to_jiffies(touchoff_delay));
-	} else
+	} else {
 		touchwake_disable_touch();
-
+	}
 out:
 	device_suspended = true;
 }
